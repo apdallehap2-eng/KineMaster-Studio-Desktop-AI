@@ -1,0 +1,7 @@
+Build target: Windows x86 (ia32), NSIS installer
+Electron: 22.3.27 (chosen for Windows 7 compatibility)
+electron-builder: 23.6.0
+Output directory: dist\
+Installer pattern: KineMaster-Studio-AI-Setup-8.1.15-Win32.exe
+
+This build kit does not contain a prebuilt EXE. BUILD.bat downloads dependencies and creates the EXE on a Windows machine with Node/npm and internet access.

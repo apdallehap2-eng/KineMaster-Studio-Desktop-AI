@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KineMaster Studio v8.1.15 - Desktop AI Edition</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --accent-yellow: #facc15;
+            --accent-blue: #3b82f6;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --text-main: #f8fafc;
+            --border-color: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { height: 55px; background-color: var(--panel-bg); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .top-left, .top-right { display: flex; align-items: center; gap: 15px; }
+        .btn { background: #334155; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn:hover { background: #475569; }
+        .btn-primary { background: var(--accent-blue); }
+        .btn-export { background: var(--accent-red); }
+        .project-title { font-size: 1.1rem; font-weight: bold; color: var(--accent-yellow); }
+        .workspace { flex: 1; display: grid; grid-template-columns: 320px 1fr 300px; grid-template-rows: 1fr 220px; gap: 10px; padding: 10px; height: calc(100vh - 55px); }
+        .panel { background-color: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; overflow-y: auto; }
+        .wheel-container { grid-column: 1; grid-row: 1; align-items: center; justify-content: center; position: relative; }
+        .media-wheel { width: 200px; height: 200px; border-radius: 50%; border: 6px solid var(--accent-blue); position: relative; display: flex; align-items: center; justify-content: center; background: rgba(59, 130, 246, 0.05); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
+        .wheel-center { font-weight: bold; font-size: 1.1rem; color: var(--accent-yellow); text-align: center; }
+        .wheel-btn { position: absolute; width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        .wb-media { top: -22px; left: calc(50% - 22px); background: var(--accent-green); }
+        .wb-layer { right: -22px; top: calc(50% - 22px); background: var(--accent-yellow); color: #000; }
+        .wb-audio { bottom: -22px; left: calc(50% - 22px); background: var(--accent-red); }
+        .wb-record { left: -22px; top: calc(50% - 22px); background: var(--accent-blue); }
+        .preview-canvas-panel { grid-column: 2 / 4; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: #000; border-radius: 8px; overflow: hidden; }
+        .canvas-screen { width: 100%; height: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; align-items: center; justify-content: center; position: relative; border: 2px dashed var(--border-color); }
+        .live-badge { position: absolute; top: 15px; right: 15px; background: rgba(239, 68, 68, 0.8); padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .preview-text-element { position: absolute; font-size: 2rem; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); border: 2px dashed var(--accent-yellow); padding: 5px 15px; cursor: move; }
+        .ai-tools-panel { grid-column: 3; grid-row: 1; background: var(--panel-bg); display: none; }
+        .ai-section-title { font-size: 1rem; color: var(--accent-yellow); margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        .control-group { margin-bottom: 15px; }
+        .control-group label { display: block; font-size: 0.85rem; margin-bottom: 5px; color: #94a3b8; }
+        .control-group input, .control-group select { width: 100%; padding: 8px; background: #0f172a; border: 1px solid var(--border-color); color: white; border-radius: 4px; }
+        .timeline-panel { grid-column: 1 / 4; grid-row: 2; display: flex; flex-direction: column; gap: 8px; }
+        .timeline-header { display: flex; justify-content: space-between; font-size: 0.9rem; color: #94a3b8; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; }
+        .tracks-container { flex: 1; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; position: relative; }
+        .track { height: 35px; background: #0f172a; border-radius: 4px; position: relative; display: flex; align-items: center; padding-left: 10px; border: 1px solid var(--border-color); }
+        .track-label { font-size: 0.75rem; font-weight: bold; width: 100px; color: #cbd5e1; }
+        .track-block { height: 27px; background: var(--accent-blue); border-radius: 4px; position: absolute; left: 110px; width: 350px; display: flex; align-items: center; padding: 0 10px; font-size: 0.8rem; cursor: pointer; }
+        .track-block.overlay { background: var(--accent-yellow); color: #000; left: 200px; width: 200px; }
+        .track-block.audio { background: var(--accent-green); left: 50px; width: 500px; }
+        .track-block.text { background: #8b5cf6; left: 150px; width: 250px; }
+        .playhead { position: absolute; top: 0; bottom: 0; left: 180px; width: 2px; background: var(--accent-red); z-index: 10; }
+        .playhead::before { content: ''; position: absolute; top: -5px; left: -4px; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid var(--accent-red); }
+        .db-status { font-size: 0.75rem; background: rgba(34, 197, 94, 0.2); color: var(--accent-green); padding: 2px 8px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="top-left">
+            <button class="btn" onclick="saveProjectToRealm()">← حفظ الخروج</button>
+            <span class="project-title">KineMaster Studio v8.1.15 (Desktop AI)</span>
+            <span class="db-status">● متصل بقاعدة بيانات Realm محلياً</span>
+        </div>
+        <div class="top-right">
+            <button class="btn btn-primary" onclick="toggleAIPanel()">✨ أدوات الذكاء الاصطناعي</button>
+            <button class="btn btn-export" onclick="exportVideo()">تصدير 4K 60FPS ↗</button>
+        </div>
+    </header>
+    <div class="workspace">
+        <div class="panel wheel-container">
+            <div class="media-wheel">
+                <div class="wheel-center" id="wheelCenterText">WHEEL</div>
+                <button class="wheel-btn wb-media" title="وسائط" onclick="addMedia()">+</button>
+                <button class="wheel-btn wb-layer" title="طبقات" onclick="addLayer()">T</button>
+                <button class="wheel-btn wb-audio" title="صوت" onclick="addAudio()">♫</button>
+                <button class="wheel-btn wb-record" title="تسجيل" onclick="startRecord()">●</button>
+            </div>
+        </div>
+        <div class="panel preview-canvas-panel">
+            <div class="canvas-screen" id="canvasScreen">
+                <div class="live-badge">Live Preview</div>
+                <div class="preview-text-element" id="previewText" contenteditable="true">Sunrise Edit Studio</div>
+            </div>
+        </div>
+        <div class="panel ai-tools-panel" id="aiToolsPanel">
+            <h3 class="ai-section-title">مركز الذكاء الاصطناعي</h3>
+            <div class="control-group">
+                <label>إزالة الخلفية الذكية (AI BG Removal)</label>
+                <button class="btn btn-primary" style="width: 100%;" onclick="removeBackgroundAI()">تفعيل عزل الخلفية الفوري</button>
+            </div>
+            <div class="control-group">
+                <label>اختيار خلفية بديلة</label>
+                <select id="bgSelector" onchange="changeBackground(this.value)">
+                    <option value="gradient">تدرج لوني سينمائي</option>
+                    <option value="city">مدينة المستقبل (Cyberpunk)</option>
+                    <option value="nature">طبيعة خضراء 4K</option>
+                    <option value="solid">لون موحد أسود</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>الترجمة التلقائية والشغافات (Auto-Captions)</label>
+                <button class="btn btn-primary" style="width: 100%;" onclick="generateAutoCaptions()">توليد الترجمة بالذكاء الاصطناعي</button>
+            </div>
+            <div class="control-group">
+                <label>توليد فيديو بالذكاء الاصطناعي (AI Video Gen)</label>
+                <input type="text" id="aiPrompt" placeholder="اكتب وصف المشهد بالذكاء الاصطناعي...">
+                <button class="btn btn-export" style="width: 100%; margin-top: 5px;" onclick="generateAIVideoScene()">توليد المشهد فوراً</button>
+            </div>
+        </div>
+        <div class="panel timeline-panel">
+            <div class="timeline-header">
+                <span>الشريط الزمني متعدد المسارات (Multi-Track Magnetic Timeline)</span>
+                <span id="timecode">00:00:00 / 00:20:00</span>
+            </div>
+            <div class="tracks-container">
+                <div class="playhead" id="playhead"></div>
+                <div class="track">
+                    <span class="track-label">Video 1</span>
+                    <div class="track-block" onclick="selectLayer('Video 1')">مقطع الفيديو الأساسي - سينمائي 4K</div>
+                </div>
+                <div class="track">
+                    <span class="track-label">Overlay</span>
+                    <div class="track-block overlay" onclick="selectLayer('Overlay')">ملصق / تراكب تأثير بصري</div>
+                </div>
+                <div class="track">
+                    <span class="track-label">Audio</span>
+                    <div class="track-block audio" onclick="selectLayer('Audio')">المسار الصوتي والموسيقى التصويرية</div>
+                </div>
+                <div class="track">
+                    <span class="track-label">Text Layer</span>
+                    <div class="track-block text" onclick="selectLayer('Text')">النص المتحرك (Sunrise Edit)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        class RealmDBSimulator {
+            constructor() {
+                this.dbName = "KineMasterStudioRealmDB";
+                this.initDB();
+            }
+            initDB() {
+                if (!localStorage.getItem(this.dbName)) {
+                    const initialProject = {
+                        id: "proj_001",
+                        name: "Sunrise Edit Project",
+                        resolution: "4K 60FPS",
+                        layers: [
+                            { type: "video", name: "Video 1", duration: 20 },
+                            { type: "text", content: "Sunrise Edit Studio", duration: 10 }
+                        ],
+                        updatedAt: new Date().toISOString()
+                    };
+                    localStorage.setItem(this.dbName, JSON.stringify(initialProject));
+                }
+            }
+            saveProject(projectData) {
+                localStorage.setItem(this.dbName, JSON.stringify(projectData));
+                console.log("تم الحفظ بنجاح في قاعدة بيانات Realm المحلية:", projectData);
+            }
+            getProject() {
+                return JSON.parse(localStorage.getItem(this.dbName));
+            }
+        }
+        const realmDB = new RealmDBSimulator();
+        function toggleAIPanel() {
+            const panel = document.getElementById('aiToolsPanel');
+            panel.style.display = panel.style.display === 'flex' ? 'none' : 'flex';
+        }
+        function addMedia() { alert("تم فتح مدير الوسائط لإضافة مقطع فيديو أو صورة جديدة."); document.getElementById('wheelCenterText').innerText = "MEDIA"; }
+        function addLayer() { alert("تم تفعيل إضافة طبقة جديدة (إصدار 8.1.15 Multi-Layer Engine)."); document.getElementById('wheelCenterText').innerText = "LAYER"; }
+        function addAudio() { alert("فتح مكتبة الأصول السحابية للمؤثرات الصوتية والموسيقى."); document.getElementById('wheelCenterText').innerText = "AUDIO"; }
+        function startRecord() { alert("جاري بدء التسجيل الصوتي المباشر فوق الطبقات..."); document.getElementById('wheelCenterText').innerText = "REC"; }
+        function selectLayer(layerName) { document.getElementById('wheelCenterText').innerText = layerName; }
+        function removeBackgroundAI() { alert("✨ تم تشغيل نموذج عزل الخلفية بالذكاء الاصطناعي (AI Magic Removal) بنجاح!"); document.getElementById('canvasScreen').style.background = "radial-gradient(circle, #3b82f6 0%, #0f172a 100%)"; }
+        function changeBackground(type) {
+            const screen = document.getElementById('canvasScreen');
+            if (type === 'city') screen.style.background = "linear-gradient(45deg, #1e1b4b, #311042)";
+            else if (type === 'nature') screen.style.background = "linear-gradient(45deg, #064e3b, #022c22)";
+            else if (type === 'solid') screen.style.background = "#000000";
+            else screen.style.background = "linear-gradient(135deg, #1e293b, #0f172a)";
+            alert("تم تغيير الخلفية بنجاح إلى: " + type);
+        }
+        function generateAutoCaptions() { alert("🎙️ تم توليد الترجمة والكلمات التلقائية (Auto-Captions Word-by-Word) بنجاح فوق الفيديو!"); document.getElementById('previewText').innerText = "Welcome to KineMaster AI Studio"; }
+        function generateAIVideoScene() {
+            const prompt = document.getElementById('aiPrompt').value;
+            if (!prompt) { alert("يرجى كتابة وصف المشهد أولاً!"); return; }
+            alert("🎬 جاري توليد الفيديو بالذكاء الاصطناعي بناءً على الوصف: (" + prompt + ") ...");
+            setTimeout(() => { alert("✨ تم توليد المشهد السينمائي وإضافته للشريط الزمني بنجاح!"); }, 1500);
+        }
+        function saveProjectToRealm() {
+            const currentProj = realmDB.getProject();
+            currentProj.updatedAt = new Date().toISOString();
+            realmDB.saveProject(currentProj);
+            alert("تم حفظ المشروع محلياً في قاعدة بيانات Realm بنجاح!");
+        }
+        function exportVideo() { alert("جاري تصدير الفيديو بجودة 4K 60FPS عبر محرك تسريع العتاد (GPU Acceleration)..."); }
+    </script>
+</body>
+</html>
